@@ -1,0 +1,267 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard · Expense Tracker{% endblock %}
+
+{% block content %}
+
+    <div class="mb-6">
+        <h1 class="text-3xl font-semibold mb-2">Dashboard</h1>
+        <p class="text-slate-400">Track spending, manage budgets, and visualize your financial health.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        
+        <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-lg relative overflow-hidden group">
+            <div class="relative z-10">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">This Month</p>
+                <div class="flex items-baseline gap-3">
+                    <h2 class="text-3xl font-bold text-white">₹{{ '%.2f'|format(this_month_sum) }}</h2>
+                    <span class="px-2 py-0.5 rounded text-xs font-medium border {{ diff_color }} bg-opacity-10 border-slate-800">
+                        {{ diff_message }}
+                    </span>
+                </div>
+                <p class="text-slate-500 text-xs mt-3">
+                    Predicted end of month: <span class="text-sky-400">{{ prediction_msg }}</span>
+                </p>
+            </div>
+            <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-24 h-24 text-brand" fill="currentColor" viewBox="0 0 24 24"><path d="M12.75 15l3-3m0 0l-3-3m3 3h-7.5M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+            </div>
+        </div>
+
+        <div class="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-lg relative overflow-hidden group">
+            <div class="relative z-10">
+                <p class="text-slate-400 text-xs font-bold uppercase tracking-wider mb-1">Lifetime Spending</p>
+                <h2 class="text-3xl font-bold text-white">₹{{ '%.2f'|format(lifetime_total) }}</h2>
+                <p class="text-slate-500 text-xs mt-3">Total recorded across all time</p>
+            </div>
+            <div class="absolute -right-4 -bottom-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                <svg class="w-24 h-24 text-purple-500" fill="currentColor" viewBox="0 0 24 24"><path d="M12 21v-8.25M15.75 21v-8.25M8.25 21v-8.25M3 9l9-6 9 6m-1.5 12V10.332A48.36 48.36 0 0012 9.75c-2.551 0-5.056.2-7.5.582V21M3 21h18M12 6.75h.008v.008H12V6.75z" /></svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mb-8">
+        
+        <section class="xl:col-span-2 flex flex-col gap-6">
+            
+            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-md">
+                
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 border-b border-slate-800 pb-4">
+                    <div>
+                        <h2 class="text-lg font-semibold text-white">Filter Expenses</h2>
+                        <p class="text-xs text-slate-500">Narrow down your list by date or category.</p>
+                    </div>
+                    
+                    <div class="text-right bg-slate-800/50 px-4 py-2 rounded-xl border border-slate-700">
+                        <p class="text-xs text-slate-400 uppercase font-bold">Found Total</p>
+                        <p class="text-2xl font-mono font-bold text-emerald-400">₹{{ '%.2f'|format(filter_total) }}</p>
+                    </div>
+                </div>
+
+                <form method="get" action="{{ url_for('index') }}" class="flex flex-wrap gap-4 items-end">
+                    
+                    <div class="flex-1 min-w-[140px]">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Start Date</label>
+                        <input name="start" value="{{ start_str }}" type="date" 
+                               class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-200 focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none transition text-sm" />
+                    </div>
+
+                    <div class="flex-1 min-w-[140px]">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">End Date</label>
+                        <input name="end" value="{{ end_str }}" type="date" 
+                               class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-200 focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none transition text-sm" />
+                    </div>
+
+                    <div class="flex-1 min-w-[160px]">
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Category</label>
+                        <select name="category" 
+                                class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-200 focus:border-brand focus:ring-1 focus:ring-brand focus:outline-none transition text-sm">
+                            <option value="">All Categories</option>
+                            {% for c in categories %}
+                                <option value="{{ c }}" {% if selected_category == c %} selected {% endif %}>{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="flex gap-2 min-w-[140px] flex-1 sm:flex-none">
+                        <button type="submit" class="flex-1 bg-brand text-slate-900 font-bold px-4 py-2 rounded-xl hover:bg-sky-400 transition text-sm">
+                            Apply
+                        </button>
+                        <a href="{{ url_for('index') }}" class="flex-1 text-center bg-slate-800 text-slate-300 border border-slate-700 px-4 py-2 rounded-xl hover:bg-slate-700 transition text-sm flex items-center justify-center">
+                            Reset
+                        </a>
+                    </div>
+                </form>
+
+                <div class="mt-4 pt-3 flex gap-4 justify-end">
+                    <a class="flex items-center gap-1 text-xs text-slate-400 hover:text-brand transition" 
+                       href="{{ url_for('export_csv', start=start_str, end=end_str, category=selected_category) }}">
+                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+                       Download CSV
+                    </a>
+                    <a class="flex items-center gap-1 text-xs text-slate-400 hover:text-brand transition" 
+                       href="{{ url_for('export_pdf', start=start_str, end=end_str, category=selected_category) }}">
+                       <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" /></svg>
+                       Download PDF
+                    </a>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-900 overflow-hidden shadow-md">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full text-sm">
+                        <thead class="bg-slate-800/50 text-slate-300 font-medium border-b border-slate-800">
+                            <tr>
+                                <th class="text-left px-6 py-4">Date</th>
+                                <th class="text-left px-6 py-4">Description</th>
+                                <th class="text-left px-6 py-4">Category</th>
+                                <th class="text-right px-6 py-4">Amount</th>
+                                <th class="px-6 py-4 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-800">
+                            {% for e in expenses %}
+                            <tr class="hover:bg-slate-800/30 transition group">
+                                <td class="px-6 py-3 whitespace-nowrap text-slate-400">{{ e.date }}</td>
+                                <td class="px-6 py-3 font-medium text-slate-200">{{ e.description }}</td>
+                                <td class="px-6 py-3 text-slate-400">
+                                    <span class="inline-flex items-center rounded-md bg-slate-800 px-2 py-1 text-xs font-medium text-slate-300 ring-1 ring-inset ring-slate-700/50">{{ e.category }}</span>
+                                </td>
+                                <td class="px-6 py-3 text-right font-mono text-slate-200">₹{{ '%.2f'|format(e.amount) }}</td>
+                                <td class="px-6 py-3 text-right whitespace-nowrap">
+                                    <div class="inline-flex gap-2 justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <a class="text-sky-400 hover:text-sky-300 text-xs px-2 py-1" href="{{ url_for('edit', id=e.id) }}">Edit</a>
+                                        <form method="post" action="{{ url_for('delete', id=e.id) }}" onsubmit="return confirm('Delete this expense?');" class="inline">
+                                            <button class="text-rose-400 hover:text-rose-300 text-xs px-2 py-1">Delete</button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% else %}
+                            <tr>
+                                <td colspan="5" class="px-6 py-12 text-center text-slate-500">
+                                    No expenses found matching your filter.
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </section>
+
+        <aside class="flex flex-col gap-6">
+            
+            <section id="add-form" class="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-md  top-24">
+                <h2 class="text-lg font-semibold mb-4 text-brand">Add New Expense</h2>
+                <form method="post" action="{{ url_for('add') }}" class="space-y-4">
+                    
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Description</label>
+                        <input name="description" required placeholder="e.g. Starbucks" 
+                               class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:border-brand focus:outline-none transition" />
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Amount</label>
+                            <input name="amount" type="number" step="0.01" min="0.01" required placeholder="0.00" 
+                                   class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:border-brand focus:outline-none transition" />
+                        </div>
+                        <div>
+                            <label class="block text-xs font-medium text-slate-400 mb-1">Date</label>
+                            <input name="date" type="date" value="{{ today }}" required 
+                                   class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-200 focus:border-brand focus:outline-none transition" />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-xs font-medium text-slate-400 mb-1">Category</label>
+                        <select name="category" 
+                                class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:border-brand focus:outline-none transition">
+                            <option value="Auto">✨ AI Auto-Detect</option>
+                            {% for c in categories %}
+                                <option value="{{ c }}">{{ c }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <button class="w-full rounded-xl bg-brand text-slate-900 font-bold px-4 py-3 hover:bg-sky-400 shadow-lg shadow-brand/20 transition transform active:scale-95" type="submit">
+                        + Add Expense
+                    </button>
+                </form>
+            </section>
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+                <h3 class="font-semibold mb-4 text-slate-300 text-sm">Category Breakdown</h3>
+                <div class="h-48 flex justify-center">
+                    <canvas id="catChart"></canvas>
+                </div>
+            </div>
+
+            <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5">
+                <h3 class="font-semibold mb-4 text-slate-300 text-sm">Daily Trend</h3>
+                <div class="h-40">
+                    <canvas id="dayChart"></canvas>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <script>
+        // Data passed from Flask
+        const catLabels = {{ cat_labels | tojson }};
+        const catValues = {{ cat_values | tojson }};
+        const dayLabels = {{ day_labels | tojson }};
+        const dayValues = {{ day_values | tojson }};
+
+        const commonOptions = {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { labels: { color: '#94a3b8', padding: 10, font: {size: 11} } }
+            }
+        };
+
+        if (document.getElementById('catChart')) {
+            new Chart(document.getElementById('catChart'), {
+                type: 'doughnut',
+                data: {
+                    labels: catLabels,
+                    datasets: [{
+                        data: catValues,
+                        backgroundColor: ['#38bdf8', '#818cf8', '#34d399', '#f472b6', '#fbbf24', '#94a3b8'],
+                        borderWidth: 0
+                    }]
+                },
+                options: { ...commonOptions, cutout: '70%' }
+            });
+        }
+
+        if (document.getElementById('dayChart')) {
+            new Chart(document.getElementById('dayChart'), {
+                type: 'bar',
+                data: {
+                    labels: dayLabels,
+                    datasets: [{
+                        label: 'Spending',
+                        data: dayValues,
+                        backgroundColor: '#38bdf8',
+                        borderRadius: 3
+                    }]
+                },
+                options: {
+                    ...commonOptions,
+                    scales: {
+                        x: { display: false }, // Hide X labels to save space in sidebar
+                        y: { grid: { color: '#1e293b' }, ticks: { color: '#64748b', font: {size: 10} } }
+                    }
+                }
+            });
+        }
+    </script>
+
+{% endblock %}

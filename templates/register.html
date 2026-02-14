@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% block title %}Register{% endblock %}
+{% block content %}
+<div class="max-w-md mx-auto mt-10 rounded-2xl bg-slate-800 p-8 border border-slate-700 shadow-xl">
+    <h2 class="text-2xl font-bold mb-6 text-center text-brand">Create Account</h2>
+    
+    <form method="post" class="space-y-4">
+        <label class="block">
+            <span class="text-slate-300 text-sm">Username</span>
+            <input type="text" name="username" required 
+                class="w-full mt-1 rounded-xl bg-slate-900 border border-slate-700 px-4 py-2 focus:border-brand focus:outline-none">
+        </label>
+        
+        <label class="block">
+            <span class="text-slate-300 text-sm">Password</span>
+            <input type="password" name="password" required 
+                class="w-full mt-1 rounded-xl bg-slate-900 border border-slate-700 px-4 py-2 focus:border-brand focus:outline-none">
+        </label>
+        
+        <button type="submit" class="w-full py-2 px-4 bg-brand text-slate-900 font-bold rounded-xl hover:bg-sky-400 transition">
+            Sign Up
+        </button>
+    </form>
+    
+    <p class="mt-4 text-center text-sm text-slate-400">
+        Already have an account? <a href="{{ url_for('login') }}" class="text-brand hover:underline">Login here</a>
+    </p>
+</div>
+{% endblock %}

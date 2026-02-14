@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+{% block title %}Edit Expense{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-10">
+  <div class="mb-6">
+    <h1 class="text-3xl font-semibold mb-2">Edit Expense</h1>
+    <p class="text-slate-400">Update the details below.</p>
+  </div>
+
+  <section class="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-lg">
+    <form method="post" class="space-y-5">
+      
+      <label class="block text-sm">
+        <span class="mb-1 block text-slate-300">Description</span>
+        <input name="description" value="{{ expense.description }}" required
+               class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:border-brand focus:outline-none transition" />
+      </label>
+
+      <div class="grid grid-cols-2 gap-4">
+        <label class="block text-sm">
+          <span class="mb-1 block text-slate-300">Amount</span>
+          <input type="number" step="0.01" min="0.01" name="amount" required
+                 value="{{ '%.2f'|format(expense.amount) }}"
+                 class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:border-brand focus:outline-none transition" />
+        </label>
+        <label class="block text-sm">
+          <span class="mb-1 block text-slate-300">Date</span>
+          <input type="date" name="date" required
+                 value="{{ expense.date.strftime('%Y-%m-%d') }}"
+                 class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:border-brand focus:outline-none transition" />
+        </label>
+      </div>
+
+      <label class="block text-sm">
+        <span class="mb-1 block text-slate-300">Category</span>
+        <select name="category"
+                class="w-full rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:border-brand focus:outline-none transition">
+          {% for c in categories %}
+            <option value="{{ c }}" {% if expense.category == c %}selected{% endif %}>{{ c }}</option>
+          {% endfor %}
+        </select>
+      </label>
+
+      <div class="flex items-center gap-3 pt-2">
+        <button class="rounded-xl bg-brand text-slate-900 font-semibold px-6 py-2 hover:bg-sky-400 transition"
+                type="submit">Save Changes</button>
+
+        <a class="rounded-xl px-6 py-2 text-slate-400 hover:text-slate-200 transition"
+           href="{{ url_for('index') }}">Cancel</a>
+      </div>
+    </form>
+  </section>
+</div>
+{% endblock %}

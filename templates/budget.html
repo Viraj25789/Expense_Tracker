@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% block title %}Budget Planner{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    
+    <div class="mb-8">
+        <h1 class="text-3xl font-semibold mb-2">Monthly Budgets</h1>
+        <p class="text-slate-400">Set limits for your spending categories.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        
+        <section class="rounded-2xl border border-slate-800 bg-slate-900 p-6 h-fit shadow-lg">
+            <h2 class="text-xl font-bold mb-4 text-brand">Set a Limit</h2>
+            <form method="post" id="budgetForm" class="space-y-4">
+                
+                <label class="block">
+                    <span class="text-slate-400 text-sm">Category</span>
+                    <select name="category" id="categoryInput" class="w-full mt-1 rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:border-brand focus:outline-none transition">
+                        {% for c in categories %}
+                        <option value="{{ c }}">{{ c }}</option>
+                        {% endfor %}
+                    </select>
+                </label>
+                
+                <label class="block">
+                    <span class="text-slate-400 text-sm">Monthly Limit (₹)</span>
+                    <input type="number" name="limit" id="limitInput" placeholder="e.g. 200" required min="1" step="0.01"
+                           class="w-full mt-1 rounded-xl bg-slate-800 border border-slate-700 px-3 py-2 text-slate-100 focus:border-brand focus:outline-none transition">
+                </label>
+                
+                <div class="flex gap-2">
+                    <button type="submit" class="flex-1 bg-brand text-slate-900 font-bold py-2 rounded-xl hover:bg-sky-400 transition mt-2">
+                        Save Budget
+                    </button>
+                    <button type="button" onclick="document.getElementById('budgetForm').reset()" class="px-4 py-2 border border-slate-700 rounded-xl text-slate-400 hover:text-white mt-2">
+                        Clear
+                    </button>
+                </div>
+            </form>
+        </section>
+
+        <section class="space-y-4">
+            {% if budget_data %}
+                {% for b in budget_data %}
+                <div class="rounded-2xl border border-slate-800 bg-slate-900 p-5 shadow-md group relative">
+                    
+                    <div class="flex justify-between items-end mb-2">
+                        <div>
+                            <h3 class="font-bold text-lg text-white">{{ b.category }}</h3>
+                            <p class="text-xs text-slate-400">
+                                Spent: <span class="text-white font-mono">₹{{ '%.0f'|format(b.spent) }}</span> 
+                                of <span class="text-slate-300 font-mono">₹{{ '%.0f'|format(b.limit) }}</span>
+                            </p>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <button onclick="editBudget('{{ b.category }}', '{{ b.limit }}')" 
+                                    class="text-slate-500 hover:text-brand transition p-1" title="Edit">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+                            </button>
+
+                            <form method="post" action="{{ url_for('delete_budget', id=b.id) }}" onsubmit="return confirm('Delete budget for {{ b.category }}?')">
+                                <button class="text-slate-500 hover:text-rose-400 transition p-1" title="Delete">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <div class="w-full bg-slate-800 rounded-full h-3 overflow-hidden border border-slate-700/50">
+                        <div class="h-3 rounded-full transition-all duration-1000 ease-out
+                            {% if b.is_over %} bg-rose-500 
+                            {% elif b.percent > 75 %} bg-yellow-400 
+                            {% else %} bg-emerald-400 {% endif %}" 
+                            style="width: {{ b.width }}%">
+                        </div>
+                    </div>
+
+                    <div class="flex justify-between items-center mt-2">
+                        {% if b.is_over %}
+                            <span class="text-rose-400 text-xs font-bold flex items-center">
+                                <svg class="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                                Exceeded by {{ b.percent - 100 }}%
+                            </span>
+                        {% else %}
+                            <span class="text-xs text-slate-500">{{ 100 - b.percent }}% remaining</span>
+                        {% endif %}
+                        
+                        <span class="text-xs font-bold {% if b.is_over %} text-rose-500 {% else %} text-emerald-500 {% endif %}">
+                            {{ b.percent }}% Used
+                        </span>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="h-full flex flex-col items-center justify-center text-slate-500 border border-dashed border-slate-700 rounded-2xl p-6">
+                    <p>No budgets set yet.</p>
+                </div>
+            {% endif %}
+        </section>
+    </div>
+</div>
+
+<script>
+    function editBudget(category, limit) {
+        // Set the Dropdown
+        document.getElementById('categoryInput').value = category;
+        // Set the Limit Amount
+        document.getElementById('limitInput').value = limit;
+        // Focus on the input
+        document.getElementById('limitInput').focus();
+        // Optional: Scroll to top
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+</script>
+{% endblock %}

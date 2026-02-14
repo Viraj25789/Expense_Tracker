@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+{% block title %}Profile Settings{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto mt-10">
+    <div class="mb-6">
+        <h1 class="text-3xl font-semibold mb-2">Profile Settings</h1>
+        <p class="text-slate-400">Manage your account details and security.</p>
+    </div>
+
+    <section class="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-lg">
+        <form method="post" class="space-y-6">
+            
+            <div class="space-y-4">
+                <h3 class="text-lg font-medium text-brand border-b border-slate-800 pb-2">Account Details</h3>
+                <label class="block">
+                    <span class="text-slate-300 text-sm">Username</span>
+                    <input type="text" name="username" value="{{ current_user.username }}" required
+                        class="w-full mt-1 rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 focus:border-brand focus:outline-none transition">
+                </label>
+            </div>
+
+            <div class="space-y-4 pt-2">
+                <h3 class="text-lg font-medium text-brand border-b border-slate-800 pb-2">Change Password</h3>
+                <p class="text-xs text-slate-500">Leave these blank if you don't want to change your password.</p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <label class="block">
+                        <span class="text-slate-300 text-sm">New Password</span>
+                        <input type="password" name="new_password" placeholder="New secret password"
+                            class="w-full mt-1 rounded-xl bg-slate-800 border border-slate-700 px-4 py-2 focus:border-brand focus:outline-none transition">
+                    </label>
+                    
+                    <label class="block">
+                        <span class="text-slate-300 text-sm">Current Password</span>
+                        <input type="password" name="current_password" placeholder="Required to save changes"
+                            class="w-full mt-1 rounded-xl bg-slate-800 border border-rose-900/30 px-4 py-2 focus:border-rose-500 focus:outline-none transition">
+                    </label>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 pt-4 border-t border-slate-800">
+                <button type="submit" class="rounded-xl bg-brand text-slate-900 font-bold px-6 py-2 hover:bg-sky-400 transition">
+                    Save Changes
+                </button>
+                <a href="{{ url_for('index') }}" class="rounded-xl px-4 py-2 text-slate-400 hover:text-slate-200 transition">
+                    Cancel
+                </a>
+            </div>
+        </form>
+    </section>
+</div>
+{% endblock %}
