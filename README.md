@@ -21,7 +21,7 @@ A smart, mobile-responsive expense tracking application built with Python (Flask
 
 ## Live site
 
-https://expense-tracker-xrxf.onrender.com
+[https://expense-tracker-xrxf.onrender.com](https://expense-tracker-xrxf.onrender.com)
 
 ## ⚙️ Installation & Setup
 
